@@ -66,7 +66,6 @@ entities:
   # Fehlerbits -> DP 102
   - entity: binary_sensor
     name: Problem
-    class: problem
     dps:
       - id: 102
         type: bitfield
@@ -117,7 +116,6 @@ entities:
   # Deckel -> DP 116
   - entity: binary_sensor
     name: Cover
-    class: opening
     dps:
       - id: 116
         type: boolean
