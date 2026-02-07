@@ -3,11 +3,9 @@ product_ids:
   - e1kr3ypo
 
 entities:
-  # --- HA lawn_mower (Haupt-Entity) ---
   - entity: lawn_mower
     icon: mdi:robot-mower
     dps:
-      # Aktivität/Zustand
       - id: 101
         type: enum
         name: activity
@@ -33,36 +31,20 @@ entities:
           - dps_val: LOCKED
             value: error
 
-      # Steuerbefehle (wird von commands unten verwendet)
       - id: 115
         type: enum
         name: command
 
-    # Lawn-mower Kommandos -> DP115
     commands:
-      start:
-        dps: 115
-        value: StartMowing
-      pause:
-        dps: 115
-        value: PauseWork
-      resume:
-        dps: 115
-        value: ContinueWork
-      dock:
-        dps: 115
-        value: StartReturnStation
-      stop:
-        dps: 115
-        value: CancelWork
+      start:   { dps: 115, value: StartMowing }
+      pause:   { dps: 115, value: PauseWork }
+      resume:  { dps: 115, value: ContinueWork }
+      dock:    { dps: 115, value: StartReturnStation }
+      stop:    { dps: 115, value: CancelWork }
 
-    # Optionaler Zusatzservice (Fixpunkt-Mähen)
     services:
-      start_fixed_mowing:
-        dps: 115
-        value: StartFixedMowing
+      start_fixed_mowing: { dps: 115, value: StartFixedMowing }
 
-  # --- Batterie ---
   - entity: sensor
     name: Battery
     device_class: battery
@@ -72,16 +54,15 @@ entities:
         type: integer
         name: battery
 
-  # --- Problem (Bitfeld) ---
   - entity: binary_sensor
     name: Problem
     device_class: problem
     dps:
       - id: 102
-        type: bitfield
+        type: bitmap     # <— vorher: bitfield
         name: fault
+        optional: true
 
-  # --- Warnung (enum) ---
   - entity: sensor
     name: Warning
     icon: mdi:alert-circle
@@ -89,8 +70,8 @@ entities:
       - id: 103
         type: enum
         name: warning
+        optional: true
 
-  # --- Deckelkontakt ---
   - entity: binary_sensor
     name: Cover
     device_class: opening
@@ -104,7 +85,6 @@ entities:
           - dps_val: false
             value: off
 
-  # --- Regenmodus ---
   - entity: switch
     name: Rain mode
     icon: mdi:weather-rainy
@@ -113,7 +93,6 @@ entities:
         type: boolean
         name: switch
 
-  # --- Arbeitszeit (h) ---
   - entity: number
     name: Work time
     icon: mdi:timer-cog
@@ -125,7 +104,6 @@ entities:
         range: { min: 1, max: 99 }
         step: 1
 
-  # --- PIN (1111–4444), als Config ---
   - entity: number
     name: PIN code
     entity_category: config
@@ -136,7 +114,6 @@ entities:
         name: value
         range: { min: 1111, max: 4444 }
 
-  # --- Plan/Partition Buttons (schreibend, pulsend) ---
   - entity: button
     name: Clear schedule
     entity_category: config
@@ -167,15 +144,15 @@ entities:
         name: button
         payload_on: true
 
-  # --- Fehler-/Arbeits-Logs als Roh-/Stringdaten ---
   - entity: sensor
     name: Error log
     entity_category: diagnostic
     icon: mdi:file-alert
     dps:
       - id: 111
-        type: string
+        type: string     # <— vorher: raw
         name: value
+        optional: true
 
   - entity: sensor
     name: Work log
@@ -183,20 +160,20 @@ entities:
     icon: mdi:book-clock
     dps:
       - id: 112
-        type: string
+        type: string     # <— vorher: raw
         name: value
+        optional: true
 
-  # --- Partitionen (Roh) ---
   - entity: sensor
     name: Partitions
     entity_category: diagnostic
     icon: mdi:grid
     dps:
       - id: 113
-        type: string
+        type: string     # <— vorher: raw
         name: value
+        optional: true
 
-  # --- „Hedgehog“-Schutz ---
   - entity: switch
     name: Hedgehog protection
     icon: mdi:shield-sun
@@ -204,8 +181,8 @@ entities:
       - id: 118
         type: boolean
         name: switch
+        optional: true
 
-  # --- Firmware ---
   - entity: sensor
     name: Firmware
     icon: mdi:chip
@@ -213,13 +190,14 @@ entities:
       - id: 134
         type: string
         name: value
+        optional: true
 
-  # --- Rain delay raw (Byte1: on/off, Byte2: delay) ---
   - entity: sensor
     name: Rain delay (raw)
     entity_category: diagnostic
     icon: mdi:weather-pouring
     dps:
       - id: 139
-        type: raw
+        type: string     # <— vorher: raw
         name: value
+        optional: true
