@@ -2,66 +2,67 @@ name: Generic Tuya mower (modelId e1kr3ypo)
 product_ids:
   - e1kr3ypo
 
-primary_entity:
-  entity: lawn_mower
-  icon: mdi:robot-mower
-  dps:
-    # Aktivität/Zustand
-    - id: 101
-      type: enum
-      name: activity
-      mapping:
-        - dps_val: STANDBY
-          value: docked
-        - dps_val: CHARGING
-          value: docked
-        - dps_val: CHARGING_WITH_TASK_SUSPEND
-          value: docked
-        - dps_val: PARK
-          value: docked
-        - dps_val: MOWING
-          value: mowing
-        - dps_val: FIXED_MOWING
-          value: mowing
-        - dps_val: PAUSED
-          value: paused
-        - dps_val: ERROR
-          value: error
-        - dps_val: EMERGENCY
-          value: error
-        - dps_val: LOCKED
-          value: error
-    # Steuerbefehle
-    - id: 115
-      type: enum
-      name: command
+entities:
+  # --- HA lawn_mower (Haupt-Entity) ---
+  - entity: lawn_mower
+    icon: mdi:robot-mower
+    dps:
+      # Aktivität/Zustand
+      - id: 101
+        type: enum
+        name: activity
+        mapping:
+          - dps_val: STANDBY
+            value: docked
+          - dps_val: CHARGING
+            value: docked
+          - dps_val: CHARGING_WITH_TASK_SUSPEND
+            value: docked
+          - dps_val: PARK
+            value: docked
+          - dps_val: MOWING
+            value: mowing
+          - dps_val: FIXED_MOWING
+            value: mowing
+          - dps_val: PAUSED
+            value: paused
+          - dps_val: ERROR
+            value: error
+          - dps_val: EMERGENCY
+            value: error
+          - dps_val: LOCKED
+            value: error
 
-  # HA-Lawn-Mower-Kommandos → DP115 Werte
-  commands:
-    start:
-      dps: 115
-      value: StartMowing
-    pause:
-      dps: 115
-      value: PauseWork
-    resume:
-      dps: 115
-      value: ContinueWork
-    dock:
-      dps: 115
-      value: StartReturnStation
-    stop:
-      dps: 115
-      value: CancelWork
+      # Steuerbefehle (wird von commands unten verwendet)
+      - id: 115
+        type: enum
+        name: command
 
-  # Optionale Zusatzservices (UI-Buttons)
-  services:
-    start_fixed_mowing:
-      dps: 115
-      value: StartFixedMowing
+    # Lawn-mower Kommandos -> DP115
+    commands:
+      start:
+        dps: 115
+        value: StartMowing
+      pause:
+        dps: 115
+        value: PauseWork
+      resume:
+        dps: 115
+        value: ContinueWork
+      dock:
+        dps: 115
+        value: StartReturnStation
+      stop:
+        dps: 115
+        value: CancelWork
 
-secondary_entities:
-  # Batterie %
+    # Optionaler Zusatzservice (Fixpunkt-Mähen)
+    services:
+      start_fixed_mowing:
+        dps: 115
+        value: StartFixedMowing
+
+  # --- Batterie ---
   - entity: sensor
     name: Battery
     device_class: battery
@@ -71,7 +72,7 @@ secondary_entities:
         type: integer
         name: battery
 
-  # Problem (Bitfeld-Fehler)
+  # --- Problem (Bitfeld) ---
   - entity: binary_sensor
     name: Problem
     device_class: problem
@@ -80,7 +81,7 @@ secondary_entities:
         type: bitfield
         name: fault
 
-  # Warnung (enum)
+  # --- Warnung (enum) ---
   - entity: sensor
     name: Warning
     icon: mdi:alert-circle
@@ -89,7 +90,7 @@ secondary_entities:
         type: enum
         name: warning
 
-  # Deckel (Top-Cover)
+  # --- Deckelkontakt ---
   - entity: binary_sensor
     name: Cover
     device_class: opening
@@ -103,7 +104,7 @@ secondary_entities:
           - dps_val: false
             value: off
 
-  # Regenmodus an/aus
+  # --- Regenmodus ---
   - entity: switch
     name: Rain mode
     icon: mdi:weather-rainy
@@ -112,7 +113,7 @@ secondary_entities:
         type: boolean
         name: switch
 
-  # Arbeitsdauer (h)
+  # --- Arbeitszeit (h) ---
   - entity: number
     name: Work time
     icon: mdi:timer-cog
@@ -121,12 +122,10 @@ secondary_entities:
         type: integer
         name: value
         unit: h
-        range:
-          min: 1
-          max: 99
+        range: { min: 1, max: 99 }
         step: 1
 
-  # PIN (1111–4444) – Kategorie "config"
+  # --- PIN (1111–4444), als Config ---
   - entity: number
     name: PIN code
     entity_category: config
@@ -135,11 +134,9 @@ secondary_entities:
       - id: 106
         type: integer
         name: value
-        range:
-          min: 1111
-          max: 4444
+        range: { min: 1111, max: 4444 }
 
-  # Plan/Partition-Buttons (schreibend, pulsend)
+  # --- Plan/Partition Buttons (schreibend, pulsend) ---
   - entity: button
     name: Clear schedule
     entity_category: config
@@ -170,7 +167,7 @@ secondary_entities:
         name: button
         payload_on: true
 
-  # Rohdaten: Schedule / Error-/Work-Logs (diagnostisch)
+  # --- Fehler-/Arbeits-Logs als Roh-/Stringdaten ---
   - entity: sensor
     name: Error log
     entity_category: diagnostic
@@ -179,7 +176,6 @@ secondary_entities:
       - id: 111
         type: string
         name: value
-        optional: true
 
   - entity: sensor
     name: Work log
@@ -189,9 +185,8 @@ secondary_entities:
       - id: 112
         type: string
         name: value
-        optional: true
 
-  # Zonen/Partition (Rohdaten)
+  # --- Partitionen (Roh) ---
   - entity: sensor
     name: Partitions
     entity_category: diagnostic
@@ -200,9 +195,8 @@ secondary_entities:
       - id: 113
         type: string
         name: value
-        optional: true
 
-  # Stachel-/„Hedgehog“-Schutz
+  # --- „Hedgehog“-Schutz ---
   - entity: switch
     name: Hedgehog protection
     icon: mdi:shield-sun
@@ -211,7 +205,7 @@ secondary_entities:
         type: boolean
         name: switch
 
-  # Firmware-Version (MCU)
+  # --- Firmware ---
   - entity: sensor
     name: Firmware
     icon: mdi:chip
@@ -219,9 +213,8 @@ secondary_entities:
       - id: 134
         type: string
         name: value
-        optional: true
 
-  # „Rain delay“ raw (Byte 1: on/off, Byte 2: Delay-Minuten)
+  # --- Rain delay raw (Byte1: on/off, Byte2: delay) ---
   - entity: sensor
     name: Rain delay (raw)
     entity_category: diagnostic
@@ -230,4 +223,3 @@ secondary_entities:
       - id: 139
         type: raw
         name: value
-        optional: true
