@@ -1,16 +1,15 @@
 name: Tuya Mower e1kr3ypo
-
-# WICHTIG: Der Parser erwartet "products" (nicht "product_ids")
 products:
   - id: e1kr3ypo
 
 entities:
-
-  # Haupt-Entity (HA lawn_mower)
+  # ---------------------------
+  # HA lawn_mower Haupt-Entity
+  # ---------------------------
   - entity: lawn_mower
     icon: mdi:robot-mower
     dps:
-      # Aktivität/Zustand -> string
+      # Aktivität/Zustand (DP101)
       - id: 101
         type: string
         name: activity
@@ -38,51 +37,122 @@ entities:
           - dps_val: LOCKED
             value: error
 
-      # Steuerbefehle -> write-only, daher optional markieren!
+      # Steuerbefehle (DP115) – write-only → optional; Mapping für UI-Services
       - id: 115
         type: string
         name: command
         optional: true
+        mapping:
+          # Basis-Services (HA lawn_mower)
+          - value: start_mowing
+            dps_val: StartMowing
+          - value: pause
+            dps_val: PauseWork
+          - value: dock
+            dps_val: StartReturnStation
+          # Erweiterte Dienste (in lawn_mower.py registriert)
+          - value: fixed_mowing
+            dps_val: StartFixedMowing
+          - value: cancel
+            dps_val: CancelWork
+          - value: resume
+            dps_val: ContinueWork
 
-    commands:
-      start:   { dps: 115, value: StartMowing }
-      pause:   { dps: 115, value: PauseWork }
-      resume:  { dps: 115, value: ContinueWork }
-      dock:    { dps: 115, value: StartReturnStation }
-      stop:    { dps: 115, value: CancelWork }
-    services:
-      start_fixed_mowing: { dps: 115, value: StartFixedMowing }
+  # ---------------------------
+  # Binary Sensoren
+  # ---------------------------
+  - entity: binary_sensor
+    name: Problem
+    icon: mdi:alert
+    dps:
+      - id: 102
+        type: bitfield
+        name: sensor
+        optional: true
 
-  # Batterie -> DP 13 (laut deinem Log)
+  - entity: binary_sensor
+    name: Cover
+    icon: mdi:archive-outline
+    dps:
+      - id: 116
+        type: boolean
+        name: sensor
+        mapping:
+          - dps_val: true
+            value: on
+          - dps_val: false
+            value: off
+
+  # ---------------------------
+  # Sensoren (lesen)
+  # ---------------------------
   - entity: sensor
     name: Battery
-    class: battery
+    icon: mdi:battery
     unit: "%"
     dps:
       - id: 13
         type: integer
-        name: battery
+        name: sensor
 
-  # Fehlerbits -> DP 102
-  - entity: binary_sensor
-    name: Problem
-    dps:
-      - id: 102
-        type: bitfield
-        name: fault
-        optional: true
-
-  # Warnung -> DP 103
   - entity: sensor
     name: Warning
-    icon: mdi:alert
+    icon: mdi:alert-circle
     dps:
       - id: 103
         type: string
-        name: warning
+        name: sensor
         optional: true
 
-  # Regenmodus -> DP 104
+  - entity: sensor
+    name: Firmware
+    icon: mdi:chip
+    dps:
+      - id: 134
+        type: string
+        name: sensor
+        optional: true
+
+  # Schedule/Logs/Partition (raw lesbar)
+  - entity: sensor
+    name: Schedule (raw)
+    icon: mdi:calendar-clock
+    dps:
+      - id: 110
+        type: string
+        name: sensor
+        optional: true
+
+  - entity: sensor
+    name: Error Log
+    icon: mdi:file-alert
+    dps:
+      - id: 111
+        type: string
+        name: sensor
+        optional: true
+
+  - entity: sensor
+    name: Work Log
+    icon: mdi:book-clock
+    dps:
+      - id: 112
+        type: string
+        name: sensor
+        optional: true
+
+  - entity: sensor
+    name: Partitions (raw)
+    icon: mdi:map
+    dps:
+      - id: 113
+        type: string
+        name: sensor
+        optional: true
+
+  # ---------------------------
+  # Switches
+  # ---------------------------
   - entity: switch
     name: Rain Mode
     icon: mdi:weather-rainy
@@ -91,7 +161,17 @@ entities:
         type: boolean
         name: switch
 
-  # Arbeitszeit -> DP 105
+  - entity: switch
+    name: Hedgehog Protection
+    icon: mdi:shield
+    dps:
+      - id: 118
+        type: boolean
+        name: switch
+
+  # ---------------------------
+  # Numbers (änderbar)
+  # ---------------------------
   - entity: number
     name: Work Time
     icon: mdi:timer-cog
@@ -102,45 +182,97 @@ entities:
         unit: h
         range: { min: 1, max: 99 }
 
-  # PIN -> DP 106
   - entity: number
     name: PIN
     icon: mdi:form-textbox-password
-    category: config
     dps:
       - id: 106
         type: integer
         name: value
         range: { min: 1111, max: 9999 }
 
-  # Deckel -> DP 116
-  - entity: binary_sensor
-    name: Cover
+  # ---------------------------
+  # Buttons (Aktionen read/refresh/clear)
+  # ---------------------------
+  - entity: button
+    name: Clear Schedule
+    icon: mdi:calendar-remove
     dps:
-      - id: 116
+      - id: 107
         type: boolean
-        name: open
-        mapping:
-          - dps_val: true
-            value: on
-          - dps_val: false
-            value: off
-
-  # Hedgehog -> DP 118
-  - entity: switch
-    name: Hedgehog Protection
-    icon: mdi:shield
-    dps:
-      - id: 118
-        type: boolean
-        name: switch
-
-  # Firmware -> DP 134
-  - entity: sensor
-    name: Firmware
-    icon: mdi:chip
-    dps:
-      - id: 134
-        type: string
-        name: value
+        name: button
+        payload_on: true
         optional: true
+
+  - entity: button
+    name: Query Schedule
+    icon: mdi:calendar-search
+    dps:
+      - id: 108
+        type: boolean
+        name: button
+        payload_on: true
+        optional: true
+
+  - entity: button
+    name: Query Partitions
+    icon: mdi:map-search
+    dps:
+      - id: 109
+        type: boolean
+        name: button
+        payload_on: true
+        optional: true
+
+  # ---------------------------
+  # SELECT: Schedule Presets (schreiben auf DP110)
+  # ---------------------------
+  - entity: select
+    name: Schedule Preset
+    icon: mdi:calendar-clock
+    dps:
+      - id: 110
+        type: string
+        name: option
+        optional: true
+        mapping:
+          # ALL: 09:00–12:00 (Segment 1)
+          - value: "ALL – 09:00–12:00"
+            dps_val: "AIiIiIgBiIiIiAKIiIiIA4iIiIgEiIiIiAWIiIiIBoiIiIgHCQAMAACIiIiIAYiIiIgCiIiIiAOIiIiIBIiIiIgFiIiIiAaIiIiIB4iIiIg="
+          # Mo–Fr: 08:00–10:00 (Segment 1)
+          - value: "Mo–Fr – 08:00–10:00"
+            dps_val: "AIiIiIgBCAAKAAIIAAoAAwgACgAECAAKAAUIAAoABoiIiIgHiIiIiACIiIiIAYiIiIgCiIiIiAOIiIiIBIiIiIgFiIiIiAaIiIiIB4iIiIg="
+          # Mix: Mo–Fr 07:30–09:30; Sa/So 10:00–13:00 (Segment 1)
+          - value: "Mix – Wochentage 07:30–09:30; Sa/So 10:00–13:00"
+            dps_val: "AAoADQABBx4JHgIHHgkeAwceCR4EBx4JHgUHHgkeBgoADQAHiIiIiACIiIiIAYiIiIgCiIiIiAOIiIiIBIiIiIgFiIiIiAaIiIiIB4iIiIg="
+          # ALL: 08:00–10:00 (Seg1) + 17:00–19:00 (Seg2)
+          - value: "ALL – 08:00–10:00 & 17:00–19:00"
+            dps_val: "AIiIiIgBiIiIiAKIiIiIA4iIiIgEiIiIiAWIiIiIBoiIiIgHCAAKAACIiIiIAYiIiIgCiIiIiAOIiIiIBIiIiIgFiIiIiAaIiIiIBxEAEwA="
+
+  # ---------------------------
+  # SELECT: Partition Presets (schreiben auf DP113)
+  # ---------------------------
+  - entity: select
+    name: Partition Preset
+    icon: mdi:map-marker-path
+    dps:
+      - id: 113
+        type: string
+        name: option
+        optional: true
+        mapping:
+          # Alles löschen (5× [0 m, w=0])
+          - value: "Clear (all zero)"
+            dps_val: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+          # 1 Zone: 20 m (w3)
+          - value: "1 Zone – 20m (w3)"
+            dps_val: "AAAAFAMAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+          # 1 Zone: 30 m (w3)
+          - value: "1 Zone – 30m (w3)"
+            dps_val: "AAAAHgMAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+          # 2 Zonen: 15 m (w2), 25 m (w3)
+          - value: "2 Zonen – 15m(w2),25m(w3)"
+            dps_val: "AAAADwIAAAAZAwAAAAAAAAAAAAAAAAAAAA=="
+          # 3 Zonen: 10 m (w2), 20 m (w3), 30 m (w4)
+          - value: "3 Zonen – 10m(w2),20m(w3),30m(w4)"
+            dps_val: "AAAACgIAAAAUAwAAAB4EAAAAAAAAAAAAAA=="
