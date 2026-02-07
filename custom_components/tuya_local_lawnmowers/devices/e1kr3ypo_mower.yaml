@@ -59,7 +59,7 @@ entities:
     device_class: problem
     dps:
       - id: 102
-        type: bitmap     # <— vorher: bitfield
+        type: bitfield     
         name: fault
         optional: true
 
