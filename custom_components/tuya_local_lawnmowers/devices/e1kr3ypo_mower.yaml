@@ -51,7 +51,7 @@ entities:
     unit_of_measurement: "%"
     dps:
       - id: 6
-        type: integer
+        type: value         # war: integer
         name: battery
 
   - entity: binary_sensor
@@ -59,7 +59,7 @@ entities:
     device_class: problem
     dps:
       - id: 102
-        type: bitfield     
+        type: bitfield      # in diesem Fork erwartet
         name: fault
         optional: true
 
@@ -98,7 +98,7 @@ entities:
     icon: mdi:timer-cog
     dps:
       - id: 105
-        type: integer
+        type: value         # war: integer
         name: value
         unit: h
         range: { min: 1, max: 99 }
@@ -110,7 +110,7 @@ entities:
     icon: mdi:form-textbox-password
     dps:
       - id: 106
-        type: integer
+        type: value         # war: integer
         name: value
         range: { min: 1111, max: 4444 }
 
@@ -150,7 +150,7 @@ entities:
     icon: mdi:file-alert
     dps:
       - id: 111
-        type: string     # <— vorher: raw
+        type: string
         name: value
         optional: true
 
@@ -160,7 +160,7 @@ entities:
     icon: mdi:book-clock
     dps:
       - id: 112
-        type: string     # <— vorher: raw
+        type: string
         name: value
         optional: true
 
@@ -170,7 +170,7 @@ entities:
     icon: mdi:grid
     dps:
       - id: 113
-        type: string     # <— vorher: raw
+        type: string
         name: value
         optional: true
 
@@ -198,6 +198,6 @@ entities:
     icon: mdi:weather-pouring
     dps:
       - id: 139
-        type: string     # <— vorher: raw
+        type: string
         name: value
         optional: true
